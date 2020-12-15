@@ -1,5 +1,8 @@
 package fi.utu.tech.ringersClockServer;
 
+import java.net.ServerSocket;
+import java.net.Socket;
+
 public class ServerSocketListener extends Thread {
 
 	private String host;
@@ -14,6 +17,11 @@ public class ServerSocketListener extends Thread {
 	}
 
 	public void run() {
-
+		ServerSocket serverSocket = new ServerSocket(port);
+		while(true) {
+			Socket clientSocket = serverSocket.accept();
+			new ClientListener(clientSocket, wup);
+		}
+		
 	}
 }
