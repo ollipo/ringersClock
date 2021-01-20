@@ -128,6 +128,8 @@ public class Gui_IO {
 	 */
 	public void AlarmAll(WakeUpGroup group) {
 		System.out.println("AlarmAll " + group.getName());
+		new AlarmConfirm(group, true);
+		ClockClient.send(AlarmConfirm);
 	}
 
 	/*

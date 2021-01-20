@@ -19,10 +19,11 @@ public class ClientListener extends Thread {
 			ObjectOutputStream oOut = new ObjectOutputStream(oS);
 			ObjectInputStream oIn = new ObjectInputStream(iS);
 			try {
-				while (true) {
-					p = () oIn.readObject();
-					.();
-					oOut.writeObject(p);
+				Object obj = ois.readObject();
+				if (obj instanceof AlarmConfirm) {
+				  wup.handleAlarmConfirm((AlarmConfirm)obj);
+				  
+					oOut.writeObject(obj);
 					oOut.flush();
 				}
 			} catch (IOException e) {
