@@ -28,7 +28,7 @@ public class Gui_IO {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				cont.setAlarmTime(Instant.now());
+				cont.setAlarmTime(time);
 			}
 		});
 	}
@@ -150,6 +150,13 @@ public class Gui_IO {
 	 */
 	public void createNewGroup(String name, Integer hour, Integer minutes, boolean norain, boolean temp) {
 		System.out.println("Create New Group pressed, name: " + name + " Wake-up time: " + hour + ":" + minutes + " Rain allowed: " + norain + " Temperature over 0 deg: " + temp);
+		//ArrayListi WakeUpGroup olioille
+		ArrayList<WakeUpGroup> wuplist = new ArrayList<>();
+		//Mistä ID? 
+		WakeUpGroup wup = new WakeUpGroup(ID, name, hour, minutes, norain, temp);
+		wuplist.add(wup);
+		appendToStatus("Group created");
+		
 	}
 
 	/*
