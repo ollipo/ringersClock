@@ -1,6 +1,8 @@
 package fi.utu.tech.ringersClock;
 
+import java.io.IOException;
 import java.time.Instant;
+import fi.utu.tech.ringersClock.entities.AlarmConfirm;
 import java.util.ArrayList;
 
 import fi.utu.tech.ringersClock.UI.MainViewController;
@@ -128,8 +130,12 @@ public class Gui_IO {
 	 */
 	public void AlarmAll(WakeUpGroup group) {
 		System.out.println("AlarmAll " + group.getName());
-		new AlarmConfirm(group, true);
-		ClockClient.send(AlarmConfirm);
+		try {
+			ClockClient.send(new AlarmConfirm(group, true));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -140,6 +146,12 @@ public class Gui_IO {
 	 */
 	public void CancelAlarm(WakeUpGroup group) {
 		System.out.println("CancelAll " + group.getName());
+		try {
+			ClockClient.send(new AlarmConfirm(group, false));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/*

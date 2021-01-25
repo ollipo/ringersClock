@@ -1,6 +1,15 @@
 package fi.utu.tech.ringersClockServer;
 
+import fi.utu.tech.ringersClock.entities.AlarmConfirm;
+
 import java.net.Socket;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.io.IOException;
+
 
 public class ClientListener extends Thread {
 
@@ -19,19 +28,27 @@ public class ClientListener extends Thread {
 			ObjectOutputStream oOut = new ObjectOutputStream(oS);
 			ObjectInputStream oIn = new ObjectInputStream(iS);
 			try {
-				Object obj = ois.readObject();
+				Object obj = oIn.readObject();
 				if (obj instanceof AlarmConfirm) {
 				  wup.handleAlarmConfirm((AlarmConfirm)obj);
-				  
-					oOut.writeObject(obj);
-					oOut.flush();
 				}
+				
 			} catch (IOException e) {
 				oIn.close();
-				oOut.close();
+		} catch (Exception e) {
+			throw new Error(e.toString());
 			}
-			} catch (Exception e) {
+		}
+	}
+		
+	public static void send(Serializable s) {
+		try {
+			oOut.writeObject(s);
+			oOut.flush();
+		} catch (IOException e) {
+			oOut.close();
+		} catch (Exception e) {
 				throw new Error(e.toString());
-			}
+		}
 	}
 }
