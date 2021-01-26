@@ -6,6 +6,8 @@ import fi.utu.tech.ringersClock.entities.AlarmConfirm;
 import java.util.ArrayList;
 
 import fi.utu.tech.ringersClock.UI.MainViewController;
+import fi.utu.tech.ringersClock.entities.JoinMessage;
+import fi.utu.tech.ringersClock.entities.ResignMessage;
 import fi.utu.tech.ringersClock.entities.WakeUpGroup;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -180,6 +182,12 @@ public class Gui_IO {
 
 	public void joinGroup(WakeUpGroup group) {
 		System.out.println("Join Group pressed" + group.getName());
+		JoinMessage join = new JoinMessage(group);
+		try {
+			ClockClient.send(join);
+		} catch(IOException ex) {
+			System.out.println(ex.getMessage());
+		}
 	}
 	
 	/*
@@ -190,5 +198,11 @@ public class Gui_IO {
 	 */
 	public void resignGroup() {
 		System.out.println("Resign Group pressed");
+		ResignMessage resign = new ResignMessage();
+		try {
+			ClockClient.send(resign);
+		} catch(IOException ex) {
+			System.out.println(ex.getMessage());
+		}
 	}
 }

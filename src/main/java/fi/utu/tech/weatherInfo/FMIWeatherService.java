@@ -33,7 +33,7 @@ public class FMIWeatherService {
 		String[] valuesArray = values.split(" ");
 
 		double temperature = Double.parseDouble(valuesArray[1]);
-		double precipitation = Double.parseDouble(valuesArray[17]);
+		double precipitation = Double.parseDouble(valuesArray[16]);
 
 		WeatherData weatherData = new WeatherData(temperature, precipitation);
 

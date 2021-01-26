@@ -1,6 +1,7 @@
 package fi.utu.tech.ringersClockServer;
 
 import fi.utu.tech.ringersClock.entities.AlarmConfirm;
+import fi.utu.tech.ringersClock.entities.JoinMessage;
 
 public class WakeUpService extends Thread {
 
@@ -17,5 +18,13 @@ public class WakeUpService extends Thread {
 			ClientListener.send(obj);
 		}
 		
+	}
+
+	public void handleJoin(ClientListener client, JoinMessage message) {
+
+	}
+
+	public void handleResign(ClientListener client) {
+
 	}
 }
