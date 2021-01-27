@@ -28,25 +28,23 @@ public class ClockClient extends Thread {
 
 	public  void run() {
 		System.out.println("Host name: " + host + " Port: " + port + " Gui_IO:" + gio.toString());
-		
 		try {
-		Socket s = new Socket(host, port);
-		
-		InputStream iS = s.getInputStream();
-		OutputStream oS = s.getOutputStream();
-		
-		ObjectOutputStream oOut = new ObjectOutputStream(oS);
-		ObjectInputStream oIn = new ObjectInputStream(iS);
+			Socket s = new Socket(host, port);
+			InputStream iS = s.getInputStream();
+			OutputStream oS = s.getOutputStream();
+			oOut = new ObjectOutputStream(oS);
+			ObjectInputStream oIn = new ObjectInputStream(iS);
 
-		Object obj = oIn.readObject();
-		if (obj instanceof AlarmConfirm) {
-		  gio.alarm();
+			while(true) {
+				Object obj = oIn.readObject();
+				if(obj instanceof AlarmConfirm) {
+					gio.alarm();
+				}
+			}
+		} catch(IOException | ClassNotFoundException ex) {
+			System.out.println(ex.getMessage());
 		}
-		oIn.close();
-		s.close();
-		} catch (Exception e) {
-			throw new Error(e.toString());
-		}
+
 	}
 	
 	public static void send(Serializable s) throws java.io.IOException {

@@ -27,42 +27,28 @@ public class ClientListener extends Thread {
 		try {
 			InputStream iS = client.getInputStream();
 			OutputStream oS = client.getOutputStream();
-			ObjectOutputStream oOut = new ObjectOutputStream(oS);
+			oOut = new ObjectOutputStream(oS);
 			ObjectInputStream oIn = new ObjectInputStream(iS);
-
-			Object obj = oIn.readObject();
-			if (obj instanceof AlarmConfirm) {
-				wup.handleAlarmConfirm((AlarmConfirm) obj);
+			while(true) {
+				Object obj = oIn.readObject();
+				if (obj instanceof AlarmConfirm) {
+					wup.handleAlarmConfirm((AlarmConfirm) obj);
+				}
+				if (obj instanceof JoinMessage) {
+					wup.handleJoin(this, (JoinMessage) obj);
+				}
+				if (obj instanceof ResignMessage) {
+					wup.handleResign(this);
+				}
 			}
-			if (obj instanceof JoinMessage) {
-				wup.handleJoin(this, (JoinMessage) obj);
-			}
-			if (obj instanceof ResignMessage) {
-				wup.handleResign(this);
-			}
-			oIn.close();
-		} catch (IOException e) {
-			throw new Error(e.toString());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (IOException | ClassNotFoundException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 
-	public static void send(Serializable s) {
-		try {
+	public static void send(Serializable s) throws java.io.IOException {
 			oOut.writeObject(s);
 			oOut.flush();
 			oOut.close();
-		} catch (IOException e) {
-			try {
-				oOut.close();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} catch (Exception e) {
-			throw new Error(e.toString());
-		}
 	}
 }
