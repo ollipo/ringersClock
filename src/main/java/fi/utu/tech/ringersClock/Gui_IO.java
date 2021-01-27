@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 
 import fi.utu.tech.ringersClock.UI.MainViewController;
+import fi.utu.tech.ringersClock.entities.AlarmConfirm;
 import fi.utu.tech.ringersClock.entities.WakeUpGroup;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -128,7 +129,7 @@ public class Gui_IO {
 	 */
 	public void AlarmAll(WakeUpGroup group) {
 		System.out.println("AlarmAll " + group.getName());
-		new AlarmConfirm(group, true);
+		AlarmConfirm test = new AlarmConfirm(group, true);
 		ClockClient.send(AlarmConfirm);
 	}
 
@@ -150,13 +151,14 @@ public class Gui_IO {
 	 */
 	public void createNewGroup(String name, Integer hour, Integer minutes, boolean norain, boolean temp) {
 		System.out.println("Create New Group pressed, name: " + name + " Wake-up time: " + hour + ":" + minutes + " Rain allowed: " + norain + " Temperature over 0 deg: " + temp);
-		//ArrayListi WakeUpGroup olioille
-		ArrayList<WakeUpGroup> wuplist = new ArrayList<>();
-		//Mistä ID? 
-		WakeUpGroup wup = new WakeUpGroup(ID, name, hour, minutes, norain, temp);
-		wuplist.add(wup);
+		
+		
+		//Mistä ID? Satunnaisluku
+		
+		WakeUpGroup wup = new WakeUpGroup(ID, name, hour, minutes, norain, temp)
 		appendToStatus("Group created");
 		
+		ClockClient.send(wup);
 	}
 
 	/*
