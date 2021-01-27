@@ -21,7 +21,7 @@ public class ServerSocketListener extends Thread {
 		while(true) {
 			Socket clientSocket = serverSocket.accept();
 			new ClientListener(clientSocket, wup);
-		}
 		
 	}
+}
 }

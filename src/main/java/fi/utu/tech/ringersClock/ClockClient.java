@@ -18,7 +18,7 @@ public class ClockClient extends Thread {
 	private String host;
 	private int port;
 	private Gui_IO gio;
-	private ObjectOutputStream oOut;
+	private static ObjectOutputStream oOut;
 
 	public ClockClient(String host, int port, Gui_IO gio) {
 		this.host = host;
@@ -26,7 +26,7 @@ public class ClockClient extends Thread {
 		this.gio = gio;
 	}
 
-	public void run() {
+	public  void run() {
 		System.out.println("Host name: " + host + " Port: " + port + " Gui_IO:" + gio.toString());
 		
 		try {
@@ -35,7 +35,7 @@ public class ClockClient extends Thread {
 		InputStream iS = s.getInputStream();
 		OutputStream oS = s.getOutputStream();
 		
-		oOut = new ObjectOutputStream(oS);
+		ObjectOutputStream oOut = new ObjectOutputStream(oS);
 		ObjectInputStream oIn = new ObjectInputStream(iS);
 
 		Object obj = oIn.readObject();

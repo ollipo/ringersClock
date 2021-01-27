@@ -11,14 +11,14 @@ public class WakeUpGroup implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String name;
-	private String ID;
+	private Integer ID;
 	private Integer hour;
 	private Integer minutes;
 	private boolean norain;
 	private boolean temp;
 	
 
-	public WakeUpGroup(String ID, String name, Integer hour, Integer minutes, boolean norain, boolean temp) {
+	public WakeUpGroup(Integer ID, String name, Integer hour, Integer minutes, boolean norain, boolean temp) {
 		super();
 		this.ID = ID;
 		this.name = name;
@@ -32,7 +32,7 @@ public class WakeUpGroup implements Serializable {
 		return this.name;
 	}
 
-	public String getID() {
+	public Integer getID() {
 		return this.ID;
 	}
 	
@@ -56,7 +56,7 @@ public class WakeUpGroup implements Serializable {
 		this.name = name;
 	}
 
-	public void setID(String ID) {
+	public void setID(Integer ID) {
 		this.ID = ID;
 	}
 	

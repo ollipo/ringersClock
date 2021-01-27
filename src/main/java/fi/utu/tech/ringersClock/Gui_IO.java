@@ -2,9 +2,8 @@ package fi.utu.tech.ringersClock;
 
 import java.io.IOException;
 import java.time.Instant;
-import fi.utu.tech.ringersClock.entities.AlarmConfirm;
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.Random;
 
 import fi.utu.tech.ringersClock.UI.MainViewController;
 import fi.utu.tech.ringersClock.entities.AlarmConfirm;
@@ -135,9 +134,8 @@ public class Gui_IO {
 	public void AlarmAll(WakeUpGroup group) {
 		System.out.println("AlarmAll " + group.getName());
 		AlarmConfirm test = new AlarmConfirm(group, true);
-		ClockClient.send(AlarmConfirm);
 		try {
-			ClockClient.send(new AlarmConfirm(group, true));
+			ClockClient.send(test);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,11 +168,10 @@ public class Gui_IO {
 		System.out.println("Create New Group pressed, name: " + name + " Wake-up time: " + hour + ":" + minutes + " Rain allowed: " + norain + " Temperature over 0 deg: " + temp);
 		
 		
-		UUID uuid = UUID.randomUUID();
-		String ID = uuid.toString();
+		Random random = new Random();
+		Integer ID = random.nextInt(100000);
 		
 		WakeUpGroup wup = new WakeUpGroup(ID, name, hour, minutes, norain, temp);
-		appendToStatus("Group created");
 		try {
 		ClockClient.send(wup);
 	} catch(IOException ex) {

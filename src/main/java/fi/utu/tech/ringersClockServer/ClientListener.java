@@ -17,6 +17,7 @@ public class ClientListener extends Thread {
 
 	private Socket client;
 	private WakeUpService wup;
+	private static ObjectOutputStream oOut;
 
 	public ClientListener(Socket s, WakeUpService wup) {
 		client = s;
@@ -54,7 +55,12 @@ public class ClientListener extends Thread {
 			oOut.writeObject(s);
 			oOut.flush();
 		} catch (IOException e) {
-			oOut.close();
+			try {
+				oOut.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} catch (Exception e) {
 				throw new Error(e.toString());
 		}
