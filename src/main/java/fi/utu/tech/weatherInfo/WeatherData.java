@@ -20,6 +20,7 @@ public class WeatherData {
 	double temperature;
 	double precipitation;
 	boolean isRaining;
+	boolean belowZero;
 
 	public WeatherData(double temperature, double precipitation) {
 
@@ -30,6 +31,12 @@ public class WeatherData {
 		}
 		else {
 			this.isRaining = false;
+		}
+		if(temperature < 0) {
+			this.belowZero = true;
+		}
+		else {
+			this.belowZero = false;
 		}
 	}
 
@@ -51,5 +58,9 @@ public class WeatherData {
 
 	public boolean isRaining() {
 		return isRaining;
+	}
+
+	public boolean isBelowZero() {
+		return belowZero;
 	}
 }
