@@ -6,6 +6,7 @@ public class JoinMessage implements Serializable {
 
     private static final long serialVersionUID = 2L;
     private WakeUpGroup group;
+    boolean joinSucceeded;
 
     public JoinMessage(WakeUpGroup group) {
 
@@ -18,6 +19,14 @@ public class JoinMessage implements Serializable {
 
     public void setWakeUpGroup(WakeUpGroup group) {
         this.group = group;
+    }
+
+    public void setJoinSucceeded(boolean success) {
+        this.joinSucceeded = success;
+    }
+
+    public boolean getJoinSucceeded() {
+        return joinSucceeded;
     }
 
 }

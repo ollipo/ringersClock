@@ -1,6 +1,9 @@
 package fi.utu.tech.ringersClockServer;
 
+import java.io.IOException;
 import java.time.LocalTime;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +23,8 @@ public class WakeUpService extends Thread {
 	private Integer timeMinutes;
 	private LocalTime wakeUpTime;
 	private LocalTime timeNow;
+
+	private ConcurrentHashMap<Integer, Vector<ClientListener>> clientsByGroupId = new ConcurrentHashMap<>();
 	
 	public WakeUpService() {
 
@@ -33,8 +38,12 @@ public class WakeUpService extends Thread {
 	}
 
 	public void handleAlarmConfirm(AlarmConfirm obj) {
-		if(obj.getWakeUp()) {
-			ClientListener.send(obj);
+		try {
+			if (obj.getWakeUp()) {
+				ClientListener.send(obj);
+			}
+		} catch(IOException ex) {
+			System.out.println(ex.getMessage());
 		}
 		
 	}
@@ -54,11 +63,48 @@ public void setGroupIdList(WakeUpGroup wakeUpGroup) {
 		wakeuptimes.put(wakeUpTime, groups2);
 	}
 
+	// Adds client to list if not yet a member of any groups
 	public void handleJoin(ClientListener client, JoinMessage message) {
+		Integer groupId = message.getWakeUpGroup().getID();
+		if(checkIfMember(client)) {
+			clientsByGroupId.get(groupId).add(client);
+			message.setJoinSucceeded(true);
+			try {
+				ClientListener.send(message);
+			} catch(IOException ex) {
+				System.out.println(ex.getMessage());
+			}
+		} else {
+			message.setJoinSucceeded(false);
+			try {
+				ClientListener.send(message);
+			} catch(IOException ex) {
+				System.out.println(ex.getMessage());
+			}
+		}
 
 	}
 
+	// Resigns client from group
 	public void handleResign(ClientListener client) {
-
+		for(Map.Entry<Integer, Vector<ClientListener>> entry : clientsByGroupId.entrySet()) {
+			entry.getValue().remove(client);
+		}
 	}
+
+	// Checks if client already in a group
+	public boolean checkIfMember(ClientListener client) {
+		boolean success = true;
+		for(Map.Entry<Integer, Vector<ClientListener>> entry : clientsByGroupId.entrySet()) {
+			if(entry.getValue().contains(client)) {
+				success = false;
+			}
+			else {
+				success = true;
+
+			}
+		}
+		return success;
+	}
+
 }

@@ -1,6 +1,8 @@
 package fi.utu.tech.ringersClock;
 
 import fi.utu.tech.ringersClock.entities.AlarmConfirm;
+import fi.utu.tech.ringersClock.entities.JoinMessage;
+
 import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +41,14 @@ public class ClockClient extends Thread {
 				Object obj = oIn.readObject();
 				if(obj instanceof AlarmConfirm) {
 					gio.alarm();
+				}
+				if(obj instanceof JoinMessage) {
+					if(((JoinMessage) obj).getJoinSucceeded()) {
+						gio.appendToStatus("Joined group " + ((JoinMessage) obj).getWakeUpGroup().getName());
+					}
+					else {
+						gio.appendToStatus("Could not join group");
+					}
 				}
 			}
 		} catch(IOException | ClassNotFoundException ex) {
