@@ -20,11 +20,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 public class WakeUpService extends Thread {
 
-	private Integer UUID;
-	private WakeUpGroup wakeUpGroup;
-	private Vector<WakeUpGroup> groups;
 	private Vector<WakeUpGroup> groups2;
-	private ConcurrentHashMap<Integer, Vector<WakeUpGroup>> groupsWithID = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<LocalTime, Vector<WakeUpGroup>> wakeuptimes;
 	private Integer timeHour;
 	private Integer timeMinutes;
@@ -38,10 +34,7 @@ public class WakeUpService extends Thread {
 	}
 
 	public void run() {
-		//herätysajan vertailu oikeaan aikaan minuutin välein
 		
-		//kun herätys, looppaisi groups2:n johtajat läpi ja lähettäisi herätysviestin
-
 		while(true) {
 			try {
 				// Variable for time right now
@@ -104,13 +97,6 @@ public class WakeUpService extends Thread {
 			System.out.println(ex.getMessage());
 		}
 		
-	}
-
-public void setGroupIdList(WakeUpGroup wakeUpGroup) {
-		UUID = wakeUpGroup.getID();
-		groups.add(wakeUpGroup);
-		groupsWithID.put(UUID, groups);
-		setGroupTimeList(wakeUpGroup);
 	}
 	
 	public void setGroupTimeList(WakeUpGroup wakeUpGroup) {
