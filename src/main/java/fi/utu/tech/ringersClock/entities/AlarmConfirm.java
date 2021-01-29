@@ -16,6 +16,10 @@ public class AlarmConfirm implements Serializable {
 		this.wakeUp = wakeUp;
 	}
 
+	public AlarmConfirm(WakeUpGroup wug) {
+		this.wug = wug;
+	}
+
 	public WakeUpGroup getWakeUpGroup() {
 		return this.wug;
 	}

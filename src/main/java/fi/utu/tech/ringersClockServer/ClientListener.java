@@ -3,6 +3,7 @@ package fi.utu.tech.ringersClockServer;
 import fi.utu.tech.ringersClock.entities.AlarmConfirm;
 import fi.utu.tech.ringersClock.entities.JoinMessage;
 import fi.utu.tech.ringersClock.entities.ResignMessage;
+import fi.utu.tech.ringersClock.entities.WakeUpGroup;
 
 import java.net.Socket;
 import java.io.InputStream;
@@ -16,7 +17,7 @@ public class ClientListener extends Thread {
 
 	private Socket client;
 	private WakeUpService wup;
-	private static ObjectOutputStream oOut;
+	private ObjectOutputStream oOut;
 
 	public ClientListener(Socket s, WakeUpService wup) {
 		client = s;
@@ -40,13 +41,16 @@ public class ClientListener extends Thread {
 				if (obj instanceof ResignMessage) {
 					wup.handleResign(this);
 				}
+				if (obj instanceof WakeUpGroup) {
+					wup.handleNewGroup((WakeUpGroup)obj, this);
+				}
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
-	public static void send(Serializable s) throws java.io.IOException {
+	public void send(Serializable s) throws java.io.IOException {
 			oOut.writeObject(s);
 			oOut.flush();
 			oOut.close();

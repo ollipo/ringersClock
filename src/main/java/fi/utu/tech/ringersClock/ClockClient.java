@@ -1,7 +1,9 @@
 package fi.utu.tech.ringersClock;
 
 import fi.utu.tech.ringersClock.entities.AlarmConfirm;
+import fi.utu.tech.ringersClock.entities.AlarmMessage;
 import fi.utu.tech.ringersClock.entities.JoinMessage;
+import fi.utu.tech.ringersClock.entities.WakeUpGroup;
 
 import java.net.Socket;
 import java.io.InputStream;
@@ -10,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /*
  * A class for handling network related stuff
@@ -40,7 +43,7 @@ public class ClockClient extends Thread {
 			while(true) {
 				Object obj = oIn.readObject();
 				if(obj instanceof AlarmConfirm) {
-					gio.alarm();
+					gio.confirmAlarm(((AlarmConfirm) obj).getWakeUpGroup());
 				}
 				if(obj instanceof JoinMessage) {
 					if(((JoinMessage) obj).getJoinSucceeded()) {
@@ -50,6 +53,13 @@ public class ClockClient extends Thread {
 						gio.appendToStatus("Could not join group");
 					}
 				}
+				if(obj instanceof ArrayList) {
+					gio.fillGroups((ArrayList<WakeUpGroup>)obj);
+				}
+				if(obj instanceof AlarmMessage) {
+					gio.alarm();
+				}
+
 			}
 		} catch(IOException | ClassNotFoundException ex) {
 			System.out.println(ex.getMessage());
