@@ -137,7 +137,6 @@ public class Gui_IO {
 		try {
 			ClockClient.send(test);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -153,7 +152,6 @@ public class Gui_IO {
 		try {
 			ClockClient.send(new AlarmConfirm(group, false));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -167,6 +165,7 @@ public class Gui_IO {
 	public void createNewGroup(String name, Integer hour, Integer minutes, boolean norain, boolean temp) {
 		System.out.println("Create New Group pressed, name: " + name + " Wake-up time: " + hour + ":" + minutes + " Rain allowed: " + norain + " Temperature over 0 deg: " + temp);
 		
+		appendToStatus("Group " + name + " created");
 		
 		Random random = new Random();
 		Integer ID = random.nextInt(100000);
