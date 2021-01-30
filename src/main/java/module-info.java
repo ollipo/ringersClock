@@ -5,6 +5,7 @@ module fi.utu.tech.ringersClock {
 	requires java.logging;
 	requires javafx.base;
 	requires java.xml;
+	requires java.base;
 
 	opens fi.utu.tech.ringersClock to javafx.fxml;
 	opens fi.utu.tech.ringersClock.UI to javafx.fxml;
