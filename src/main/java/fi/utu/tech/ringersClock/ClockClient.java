@@ -12,6 +12,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 /*
@@ -58,6 +60,11 @@ public class ClockClient extends Thread {
 				}
 				if(obj instanceof AlarmMessage) {
 					gio.alarm();
+				}
+				if(obj instanceof LocalTime) {
+					LocalTime time = (LocalTime)obj;
+					Instant alarmTime = Instant.parse(time.toString());
+					gio.setAlarmTime(alarmTime);
 				}
 
 			}

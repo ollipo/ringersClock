@@ -129,10 +129,13 @@ public void setGroupIdList(WakeUpGroup wakeUpGroup) {
 		Vector<ClientListener> clients = new Vector<>();
 		clients.add(client);
 		clientsByGroupId.put(group.getID(), clients);
-
+		// Save group alarm time to LocalTime object
+		LocalTime time = LocalTime.of(group.getHour(), group.getMinutes());
 		// Send all groups to client to update grouplist
+		// Send alarm time to client
 		try {
 			client.send(getGroupsAsArray());
+			client.send(time);
 		} catch(IOException ex) {
 			System.out.println(ex.getMessage());
 		}
@@ -152,15 +155,33 @@ public void setGroupIdList(WakeUpGroup wakeUpGroup) {
 	// Adds client to list if not yet a member of any groups
 	public void handleJoin(ClientListener client, JoinMessage message) {
 		Integer groupId = message.getWakeUpGroup().getID();
+		LocalTime time = LocalTime.now();
+
+		// Check if client already a member, if not add to clientsByGroupId, if yes, send message back join not succeeded
+		// If client joins group, groups alarm time is sent back to client
 		if(checkIfMember(client)) {
 			clientsByGroupId.get(groupId).add(client);
 			message.setJoinSucceeded(true);
+			// Loop through wakeuptimes to find group client joined
+			for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
+				// Loop through vectors and assign alarm time to LocalTime time
+				for(WakeUpGroup g : entry.getValue()) {
+					if(g.getID().equals(groupId)) {
+						time = entry.getKey();
+						break;
+					}
+				}
+			}
 			try {
+				// Send success message to client
 				client.send(message);
+				// Send alarm time to client
+				client.send(time);
 			} catch(IOException ex) {
 				System.out.println(ex.getMessage());
 			}
 		} else {
+			// Joining group failed, send information to client
 			message.setJoinSucceeded(false);
 			try {
 				client.send(message);
@@ -173,6 +194,7 @@ public void setGroupIdList(WakeUpGroup wakeUpGroup) {
 
 	// Resigns client from group
 	public void handleResign(ClientListener client) {
+		// Loop through clientsByGroupId and remove this client
 		for(Map.Entry<Integer, Vector<ClientListener>> entry : clientsByGroupId.entrySet()) {
 			entry.getValue().remove(client);
 		}
