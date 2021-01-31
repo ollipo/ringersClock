@@ -162,9 +162,17 @@ public class WakeUpService extends Thread {
 	public void handleNewGroup(WakeUpGroup group, ClientListener client) {
 		// Set group and time to wakeuptimes
 		LocalTime time = LocalTime.of(group.getHour(), group.getMinutes());
-		Vector<WakeUpGroup> groups = new Vector<>();
-		groups.add(group);
-		wakeuptimes.put(time, groups);
+		if(wakeuptimes.containsKey(time)) {
+			for (Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
+				if (entry.getKey().equals(time)) {
+					entry.getValue().add(group);
+				}
+			}
+		} else {
+			Vector<WakeUpGroup> groups = new Vector<>();
+			groups.add(group);
+			wakeuptimes.put(time, groups);
+		}
 
 		// Create new client vector, add leader to vector, and add vector to clientsByGroupId
 		Vector<ClientListener> clients = new Vector<>();
@@ -189,7 +197,9 @@ public class WakeUpService extends Thread {
 	public ArrayList<WakeUpGroup> getGroupsAsArray() {
 		ArrayList<WakeUpGroup> groupsInArrayList = new ArrayList<>();
 		for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
-			groupsInArrayList.addAll(entry.getValue());
+			for(WakeUpGroup g : entry.getValue()) {
+				groupsInArrayList.add(g);
+			}
 		}
 		return groupsInArrayList;
 	}
