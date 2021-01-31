@@ -37,7 +37,6 @@ public class WakeUpService extends Thread {
 	public void run() {
 		
 		while(true) {
-			if(wakeuptimes.size() > 0) {
 				try {
 					// Variable for time right now
 					LocalTime timeNow = LocalTime.now();
@@ -49,18 +48,32 @@ public class WakeUpService extends Thread {
 						String wakeuptime = entry.getKey().toString();
 						// If key matches, parse time as string back to LocalTime and create a vector for all groups in key
 						if (wakeuptime.equals(timeNowAsString)) {
+							System.out.println("Found equal time");
 							LocalTime time = LocalTime.parse(wakeuptime);
 							Vector<WakeUpGroup> groupsInKey = new Vector<>(wakeuptimes.get(time));
 							// Loop through created group vector, check if weatherdata okay, and send alarmConfirm to leader
-							// How to handle cancel? Need to destroy group, but first need to update grouplist in client?
 							for (WakeUpGroup g : groupsInKey) {
 								if (checkWeather(g)) {
+								System.out.println("Sending alarm confirm");
 									AlarmConfirm confirm = new AlarmConfirm(g);
 									try {
-										clientsByGroupId.get(g.getID()).get(0).send(confirm);
+										clientsByGroupId.get(g.getID()).firstElement().send(confirm);
+										System.out.println("Alarm confirm sent");
 									} catch (IOException ex) {
 										System.out.println(ex.getMessage());
 									}
+								} else {
+									AlarmCancelledMessage cancelled = new AlarmCancelledMessage();
+									for(ClientListener c : clientsByGroupId.get(g.getID())) {
+										c.send(cancelled);
+									}
+									for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entries : wakeuptimes.entrySet()) {
+										entries.getValue().removeIf(group -> group.getID().equals(g.getID()));
+									}
+									for(ClientListener c : connectedClients) {
+										c.send(getGroupsAsArray());
+									}
+									clientsByGroupId.remove(g.getID());
 								}
 							}
 						}
@@ -78,7 +91,6 @@ public class WakeUpService extends Thread {
 				} catch (XPathExpressionException e) {
 					e.printStackTrace();
 				}
-			}
 		}
 
 	}
@@ -90,12 +102,38 @@ public class WakeUpService extends Thread {
 				// Check groups ID and save all clients from clientsByGroupId to a vector
 				Vector<ClientListener> clients = new Vector<>(clientsByGroupId.get(obj.getWakeUpGroup().getID()));
 				// Loop through vector and send message to alarm all clients
-				// How to handle cancel? Need to destroy group, but first need to update grouplist in client
 				for(ClientListener c : clients) {
 					AlarmMessage alarmConfirmed = new AlarmMessage();
 					c.send(alarmConfirmed);
 				}
+				// Remove group from wakeuptimes and update list to clients
+				for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
+					entry.getValue().removeIf(g -> g.getID().equals(obj.getWakeUpGroup().getID()));
+				}
+				for(ClientListener c : connectedClients) {
+					c.send(getGroupsAsArray());
+				}
+
+
+			} else {
+				// Find and remove this group from wakeuptimes list
+				for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
+					entry.getValue().removeIf(g -> g.getID().equals(obj.getWakeUpGroup().getID()));
+				}
+				// Check groups ID and save all clients from clientsByGroupId to a vector
+				// Loop through and send cancel message and updated grouplist to all clients in group
+				Vector<ClientListener> clients = new Vector<>(clientsByGroupId.get(obj.getWakeUpGroup().getID()));
+				for(ClientListener c : clients) {
+					AlarmCancelledMessage cancel = new AlarmCancelledMessage();
+					c.send(cancel);
+				}
+				for(ClientListener c : connectedClients) {
+					c.send(getGroupsAsArray());
+				}
+
 			}
+			// Remove clients from clientsByGroupId
+			clientsByGroupId.remove(obj.getWakeUpGroup().getID());
 		} catch(IOException ex) {
 			System.out.println(ex.getMessage());
 		}
@@ -110,6 +148,7 @@ public class WakeUpService extends Thread {
 		wakeuptimes.put(wakeUpTime, groups2);
 	}
 
+	// Add client to connection list and send all groups at server
 	public void addClientConnection(ClientListener client) {
 		connectedClients.add(client);
 		try {
@@ -132,11 +171,14 @@ public class WakeUpService extends Thread {
 		clients.add(client);
 		clientsByGroupId.put(group.getID(), clients);
 
-		// Send all groups to client to update grouplist
+		// Send all groups to clients for update
 		// Send alarm time to client
 		try {
-			client.send(getGroupsAsArray());
+			for(ClientListener c : connectedClients) {
+				c.send(getGroupsAsArray());
+			}
 			client.send(time);
+
 		} catch(IOException ex) {
 			System.out.println(ex.getMessage());
 		}
@@ -197,7 +239,37 @@ public class WakeUpService extends Thread {
 	public void handleResign(ClientListener client) {
 		// Loop through clientsByGroupId and remove this client
 		for(Map.Entry<Integer, Vector<ClientListener>> entry : clientsByGroupId.entrySet()) {
+			if(entry.getValue().firstElement() == client) {
+				for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entries : wakeuptimes.entrySet()) {
+					entries.getValue().removeIf(group -> group.getID().equals(entry.getKey()));
+				}
+				for(ClientListener c : entry.getValue()) {
+					AlarmCancelledMessage cancelled = new AlarmCancelledMessage();
+					try {
+						c.send(cancelled);
+					} catch(IOException ex) {
+						System.out.println(ex.getMessage());
+					}
+				}
+				for(ClientListener c : connectedClients) {
+					try {
+						c.send(getGroupsAsArray());
+					} catch(IOException ex) {
+						System.out.println(ex.getMessage());
+					}
+				}
+			}
 			entry.getValue().remove(client);
+		}
+		ResignMessage resign = new ResignMessage();
+		for(ClientListener c : connectedClients) {
+			if(c == client) {
+				try{
+					c.send(resign);
+				} catch(IOException ex) {
+					System.out.println(ex.getMessage());
+				}
+			}
 		}
 	}
 

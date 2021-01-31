@@ -32,7 +32,7 @@ public class WeatherData {
 		else {
 			this.isRaining = false;
 		}
-		if(temperature < 0) {
+		if(temperature < 0.0) {
 			this.belowZero = true;
 		}
 		else {

@@ -1,9 +1,6 @@
 package fi.utu.tech.ringersClock;
 
-import fi.utu.tech.ringersClock.entities.AlarmConfirm;
-import fi.utu.tech.ringersClock.entities.AlarmMessage;
-import fi.utu.tech.ringersClock.entities.JoinMessage;
-import fi.utu.tech.ringersClock.entities.WakeUpGroup;
+import fi.utu.tech.ringersClock.entities.*;
 
 import java.net.Socket;
 import java.io.InputStream;
@@ -45,14 +42,16 @@ public class ClockClient extends Thread {
 			while(true) {
 				Object obj = oIn.readObject();
 				if(obj instanceof AlarmConfirm) {
-					gio.confirmAlarm(((AlarmConfirm) obj).getWakeUpGroup());
+					WakeUpGroup group = ((AlarmConfirm) obj).getWakeUpGroup();
+					gio.confirmAlarm(group);
+					gio.appendToStatus("Alarm time, please confirm.");
 				}
 				if(obj instanceof JoinMessage) {
 					if(((JoinMessage) obj).getJoinSucceeded()) {
 						gio.appendToStatus("Joined group " + ((JoinMessage) obj).getWakeUpGroup().getName());
 					}
 					else {
-						gio.appendToStatus("Could not join group");
+						gio.appendToStatus("Could not join group.");
 					}
 				}
 				if(obj instanceof ArrayList) {
@@ -63,8 +62,15 @@ public class ClockClient extends Thread {
 				}
 				if(obj instanceof LocalTime) {
 					LocalTime time = (LocalTime)obj;
-					Instant alarmTime = Instant.parse(time.toString());
-					gio.setAlarmTime(alarmTime);
+					gio.appendToStatus("Alarm set for " + time.toString());
+				}
+				if(obj instanceof AlarmCancelledMessage) {
+					gio.clearAlarmTime();
+					gio.appendToStatus("Alarm Cancelled.");
+				}
+				if(obj instanceof ResignMessage) {
+					gio.clearAlarmTime();
+					gio.appendToStatus("Resigned from group.");
 				}
 
 			}
