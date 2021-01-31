@@ -30,6 +30,7 @@ public class ClientListener extends Thread {
 			OutputStream oS = client.getOutputStream();
 			oOut = new ObjectOutputStream(oS);
 			ObjectInputStream oIn = new ObjectInputStream(iS);
+			wup.addClientConnection(this);
 			while(true) {
 				Object obj = oIn.readObject();
 				if (obj instanceof AlarmConfirm) {
@@ -53,6 +54,5 @@ public class ClientListener extends Thread {
 	public void send(Serializable s) throws java.io.IOException {
 			oOut.writeObject(s);
 			oOut.flush();
-			oOut.close();
 	}
 }

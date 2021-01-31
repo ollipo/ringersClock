@@ -22,7 +22,8 @@ public class ServerSocketListener extends Thread {
 			ServerSocket serverSocket = new ServerSocket(port);
 			while (true) {
 				Socket clientSocket = serverSocket.accept();
-				new ClientListener(clientSocket, wup);
+				ClientListener client = new ClientListener(clientSocket, wup);
+				client.start();
 			}
 		} catch (IOException ex) {
 			System.out.println(ex.getMessage());

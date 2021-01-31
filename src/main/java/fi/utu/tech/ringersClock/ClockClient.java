@@ -77,7 +77,6 @@ public class ClockClient extends Thread {
 	public static void send(Serializable s) throws java.io.IOException {
 		oOut.writeObject(s);
 		oOut.flush();
-		oOut.close();
 		}
 
 }

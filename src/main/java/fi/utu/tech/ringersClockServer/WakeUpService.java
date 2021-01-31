@@ -21,13 +21,14 @@ import javax.xml.xpath.XPathExpressionException;
 public class WakeUpService extends Thread {
 
 	private Vector<WakeUpGroup> groups2;
-	private ConcurrentHashMap<LocalTime, Vector<WakeUpGroup>> wakeuptimes;
 	private Integer timeHour;
 	private Integer timeMinutes;
 	private LocalTime wakeUpTime;
 
+	private ConcurrentHashMap<LocalTime, Vector<WakeUpGroup>> wakeuptimes = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<Integer, Vector<ClientListener>> clientsByGroupId = new ConcurrentHashMap<>();
 	private DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
+	private Vector<ClientListener> connectedClients = new Vector<>();
 	
 	public WakeUpService() {
 
@@ -36,45 +37,47 @@ public class WakeUpService extends Thread {
 	public void run() {
 		
 		while(true) {
-			try {
-				// Variable for time right now
-				LocalTime timeNow = LocalTime.now();
-				// Format to string
-				String timeNowAsString = DATE_TIME_FORMAT.format(timeNow);
+			if(wakeuptimes.size() > 0) {
+				try {
+					// Variable for time right now
+					LocalTime timeNow = LocalTime.now();
+					// Format to string
+					String timeNowAsString = DATE_TIME_FORMAT.format(timeNow);
 
-				// Loop through wakeuptimes, see if key matches timeNowAsString
-				for(Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
-					String wakeuptime = entry.getKey().toString();
-					// If key matches, parse time as string back to LocalTime and create a vector for all groups in key
-					if(wakeuptime.equals(timeNowAsString)) {
-						LocalTime time = LocalTime.parse(wakeuptime);
-						Vector<WakeUpGroup> groupsInKey = new Vector<>(wakeuptimes.get(time));
-						// Loop through created group vector, check if weatherdata okay, and send alarmConfirm to leader
-						// How to handle cancel? Need to destroy group, but first need to update grouplist in client?
-						for(WakeUpGroup g : groupsInKey) {
-							if (checkWeather(g)) {
-								AlarmConfirm confirm = new AlarmConfirm(g);
-								try {
-									clientsByGroupId.get(g.getID()).get(0).send(confirm);
-								} catch (IOException ex) {
-									System.out.println(ex.getMessage());
+					// Loop through wakeuptimes, see if key matches timeNowAsString
+					for (Map.Entry<LocalTime, Vector<WakeUpGroup>> entry : wakeuptimes.entrySet()) {
+						String wakeuptime = entry.getKey().toString();
+						// If key matches, parse time as string back to LocalTime and create a vector for all groups in key
+						if (wakeuptime.equals(timeNowAsString)) {
+							LocalTime time = LocalTime.parse(wakeuptime);
+							Vector<WakeUpGroup> groupsInKey = new Vector<>(wakeuptimes.get(time));
+							// Loop through created group vector, check if weatherdata okay, and send alarmConfirm to leader
+							// How to handle cancel? Need to destroy group, but first need to update grouplist in client?
+							for (WakeUpGroup g : groupsInKey) {
+								if (checkWeather(g)) {
+									AlarmConfirm confirm = new AlarmConfirm(g);
+									try {
+										clientsByGroupId.get(g.getID()).get(0).send(confirm);
+									} catch (IOException ex) {
+										System.out.println(ex.getMessage());
+									}
 								}
 							}
 						}
 					}
+					// Sleep for one minute, then repeat
+					sleep(60000);
+				} catch (InterruptedException ex) {
+					System.out.println(ex.getMessage());
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ParserConfigurationException e) {
+					e.printStackTrace();
+				} catch (SAXException e) {
+					e.printStackTrace();
+				} catch (XPathExpressionException e) {
+					e.printStackTrace();
 				}
-				// Sleep for one minute, then repeat
-				sleep(60000);
-			} catch(InterruptedException ex) {
-				System.out.println(ex.getMessage());
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			} catch (SAXException e) {
-				e.printStackTrace();
-			} catch (XPathExpressionException e) {
-				e.printStackTrace();
 			}
 		}
 
@@ -107,16 +110,28 @@ public class WakeUpService extends Thread {
 		wakeuptimes.put(wakeUpTime, groups2);
 	}
 
+	public void addClientConnection(ClientListener client) {
+		connectedClients.add(client);
+		try {
+			client.send(getGroupsAsArray());
+		} catch(IOException ex) {
+			System.out.println(ex.getMessage());
+		}
+	}
+
 	// Adds new group to list and sends all groups back to client for update
 	public void handleNewGroup(WakeUpGroup group, ClientListener client) {
 		// Set group and time to wakeuptimes
-		setGroupTimeList(group);
+		LocalTime time = LocalTime.of(group.getHour(), group.getMinutes());
+		Vector<WakeUpGroup> groups = new Vector<>();
+		groups.add(group);
+		wakeuptimes.put(time, groups);
+
 		// Create new client vector, add leader to vector, and add vector to clientsByGroupId
 		Vector<ClientListener> clients = new Vector<>();
 		clients.add(client);
 		clientsByGroupId.put(group.getID(), clients);
-		// Save group alarm time to LocalTime object
-		LocalTime time = LocalTime.of(group.getHour(), group.getMinutes());
+
 		// Send all groups to client to update grouplist
 		// Send alarm time to client
 		try {
