@@ -10,7 +10,10 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 
 /*
@@ -61,7 +64,11 @@ public class ClockClient extends Thread {
 					gio.alarm();
 				}
 				if(obj instanceof LocalTime) {
+
 					LocalTime time = (LocalTime)obj;
+					LocalDateTime ldt = (time.atDate(LocalDate.parse("2020-07-29")));
+				    Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+					gio.setAlarmTime(instant);
 					gio.appendToStatus("Alarm set for " + time.toString());
 				}
 				if(obj instanceof AlarmCancelledMessage) {
